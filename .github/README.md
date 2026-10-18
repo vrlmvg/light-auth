@@ -1,41 +1,39 @@
 # Ente Auth for the Light Phone III
 
-An unofficial two-factor code tool for the Light Phone III that works with [Ente Auth](https://ente.io/auth),
-built with the [Light SDK](https://github.com/lightphone/light-sdk).
+An unofficial two-factor code tool for the Light Phone III for [Ente Auth](https://ente.io/auth) accounts, built
+with the [Light SDK](https://github.com/lightphone/light-sdk).
 
+- Sign in to your Ente account, on Ente's servers or your own self-hosted Ente
 - See your two-factor (TOTP) codes with a countdown
-- Sign in to your Ente account and keep codes in sync, one way, from Ente to the phone
-- Or import an Ente Auth export file, plain or encrypted, from your computer
-- Add single codes by scanning their QR code
+- Codes stay in sync with your account, one way, from Ente to the phone
 
 <p>
   <img src="screenshots/1-list.png" width="200" alt="Code list">
   <img src="screenshots/2-code.png" width="200" alt="A code with its countdown">
-  <img src="screenshots/3-import.png" width="200" alt="Importing an Ente export">
-  <img src="screenshots/4-settings.png" width="200" alt="Signed in to Ente">
+  <img src="screenshots/3-sign-in.png" width="200" alt="Signing in, with Ente's server as the default">
+  <img src="screenshots/4-signed-in.png" width="200" alt="Signed in to Ente">
 </p>
 
 The screenshots use a made-up test account.
 
-## Getting your codes onto the phone
+## Signing in
 
-**Sign in to Ente** (Settings → Sign in to Ente): enter your Ente email and password. If your account has
-two-factor login, enter the code from your authenticator app or the one Ente emails you. Codes then sync from Ente
-to the phone; nothing on the phone is sent back. Accounts that use a passkey for two-factor login can't sign in, as
-the Light Phone can't use passkeys. Self-hosted Ente servers work too: change Settings → Server.
+Open **Settings → Sign in to Ente** and enter your Ente email and password. If your account has two-factor
+login, enter the code from your authenticator app or the one Ente emails you. Accounts that use a passkey for
+two-factor login can't sign in, as the Light Phone can't use passkeys.
 
-**Import an export**:
+The tool uses Ente's own servers (`api.ente.io`) by default. If you run your own Ente server, change
+**Settings → Server** to its address before signing in; plain `http://` works for servers on your home network.
 
-1. In the Ente Auth app on your other device, open Settings → Data → Export codes.
-2. On a computer on the same Wi-Fi as your Light Phone, open the Tool Manager from the phone's Settings.
-3. Choose Ente Auth → Ente export and upload the file.
-4. Open Ente Auth on the phone; the import starts on its own. Encrypted exports ask for their password. The file is
-   deleted from the phone once it's imported.
+Your codes then sync from Ente to the phone. Add, edit and delete codes in the Ente app on your other devices;
+the changes show up on the phone. Nothing on the phone is sent back. Signing out removes the codes from the phone;
+they stay in your Ente account.
 
-Codes are stored encrypted with a key kept in the phone's Android Keystore. Ente's end-to-end encryption is
-unlocked on the phone; your Ente password never leaves it.
+Ente's end-to-end encryption is unlocked on the phone, and your Ente password never leaves it. Codes are stored
+on the phone encrypted with a key kept in the Android Keystore.
 
-Supported: TOTP codes with SHA-1, SHA-256 or SHA-512. HOTP (counter-based) and Steam codes are skipped on import.
+Supported: TOTP codes with SHA-1, SHA-256 or SHA-512. HOTP (counter-based) and Steam codes in your account are
+skipped.
 
 This project is not affiliated with Ente.
 

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.ui.LightBarButton
-import com.thelightphone.sdk.ui.LightBottomBar
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
@@ -96,30 +95,6 @@ class AuthenticatorCodeScreen(
                             )
                         }
                     }
-                }
-
-                val loadedAccount = account
-                if (loadedAccount != null) {
-                    LightBottomBar(
-                        items = listOf(
-                            LightBarButton.Text(
-                                text = "REMOVE",
-                                onClick = {
-                                    navigateTo(screenFactory = {
-                                        AuthenticatorConfirmRemoveScreen(
-                                            it,
-                                            loadedAccount,
-                                            repository,
-                                        )
-                                    }) { removed ->
-                                        if (removed) {
-                                            goBack()
-                                        }
-                                    }
-                                },
-                            ),
-                        ),
-                    )
                 }
             }
         }

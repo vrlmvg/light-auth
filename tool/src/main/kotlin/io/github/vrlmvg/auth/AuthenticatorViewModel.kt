@@ -5,9 +5,12 @@ import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SimpleLightScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class AuthenticatorViewModel(
@@ -17,6 +20,10 @@ class AuthenticatorViewModel(
 ) : LightViewModel<Unit>() {
     private val _accounts = MutableStateFlow<List<StoredAccount>>(emptyList())
     val accounts: StateFlow<List<StoredAccount>> = _accounts.asStateFlow()
+
+    /** Null until the stored session has been read. */
+    val signedIn: StateFlow<Boolean?> = enteStore.email.map { it != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _errorModal = MutableStateFlow<String?>(null)
     val errorModal: StateFlow<String?> = _errorModal.asStateFlow()
@@ -38,7 +45,7 @@ class AuthenticatorViewModel(
             if (System.currentTimeMillis() - last < AUTO_SYNC_INTERVAL_MILLIS) return@launch
             runCatching { enteSync.sync() }
                 .onSuccess { reloadAccounts() }
-                .onFailure { if (it is EnteSessionExpiredException) showError("${it.message}\n\nOpen ENTE to sign in.") }
+                .onFailure { if (it is EnteSessionExpiredException) showError("${it.message}\n\nOpen Settings to sign in again.") }
         }
     }
 

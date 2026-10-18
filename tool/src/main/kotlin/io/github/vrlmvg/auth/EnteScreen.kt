@@ -390,17 +390,15 @@ class EnteScreen(sealedActivity: SealedLightActivity) : LightScreen<Unit, EnteVi
         ) {
             if (ui.email == null) {
                 Row("Account", "Sign in to Ente", viewModel::startSignIn)
-                Row("From a file", "Import an export", ::openImport)
                 Row("Server", ui.endpoint.removePrefix("https://"), viewModel::editServer)
             } else {
                 Row("Signed in as", ui.email, null)
                 Row(lastSyncLabel(ui.lastSyncMillis), "Sync now", viewModel::syncNow)
-                Row("From a file", "Import an export", ::openImport)
                 Row("Account", "Sign out", viewModel::askSignOut)
             }
         }
         LightText(
-            text = "Codes sync one way, from Ente to this phone.",
+            text = "Codes sync from your Ente account. Add and edit them in the Ente app.",
             variant = LightTextVariant.Detail,
             lighten = true,
             align = TextAlign.Center,
@@ -458,7 +456,7 @@ class EnteScreen(sealedActivity: SealedLightActivity) : LightScreen<Unit, EnteVi
             contentAlignment = Alignment.Center,
         ) {
             LightText(
-                "Sign out of Ente?\n\nCodes synced from Ente will be removed from this phone. Codes you added here stay.",
+                "Sign out of Ente?\n\nYour codes will be removed from this phone. They stay in your Ente account.",
                 variant = LightTextVariant.Copy,
                 align = TextAlign.Center,
             )
@@ -470,10 +468,6 @@ class EnteScreen(sealedActivity: SealedLightActivity) : LightScreen<Unit, EnteVi
                 null,
             ),
         )
-    }
-
-    private fun openImport() {
-        navigateTo(screenFactory = { ImportScreen(it, AuthServices.get(lightContext).repository) })
     }
 
     private fun lastSyncLabel(millis: Long?): String {

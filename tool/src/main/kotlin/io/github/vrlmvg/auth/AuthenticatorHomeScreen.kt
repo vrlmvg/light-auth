@@ -46,6 +46,7 @@ class AuthenticatorHomeScreen(sealedActivity: SealedLightActivity) :
     override fun Content() {
         val themeColors by LightThemeController.colors.collectAsState()
         val accounts by viewModel.accounts.collectAsState()
+        val signedIn by viewModel.signedIn.collectAsState()
         val errorModal by viewModel.errorModal.collectAsState()
 
         LightTheme(colors = themeColors) {
@@ -68,7 +69,11 @@ class AuthenticatorHomeScreen(sealedActivity: SealedLightActivity) :
                             contentAlignment = Alignment.Center,
                         ) {
                             LightText(
-                                text = "no accounts added",
+                                text = when (signedIn) {
+                                    true -> "No codes in your Ente account yet. Add them in the Ente app."
+                                    false -> "Sign in to your Ente account to see your codes."
+                                    null -> ""
+                                },
                                 variant = LightTextVariant.Copy,
                                 align = TextAlign.Center,
                                 modifier = Modifier.padding(horizontal = 1f.gridUnitsAsDp()),
@@ -100,30 +105,6 @@ class AuthenticatorHomeScreen(sealedActivity: SealedLightActivity) :
                         }
                     }
 
-                    fun goToAddNew() {
-                        navigateTo(screenFactory = {
-                            AuthenticatorQrScannerScreen(
-                                it,
-                                repository
-                            )
-                        }) { scanResult ->
-                            val account = scanResult.getOrNull()
-                            if (account == null) {
-                                viewModel.showError(
-                                    scanResult.exceptionOrNull()?.message ?: "Invalid QR Code",
-                                )
-                                return@navigateTo
-                            }
-                            navigateTo(screenFactory = {
-                                AuthenticatorCodeScreen(
-                                    it,
-                                    account.id,
-                                    repository
-                                )
-                            })
-                        }
-                    }
-
                     fun goToEnte() {
                         navigateTo(screenFactory = { EnteScreen(it) })
                     }
@@ -135,11 +116,8 @@ class AuthenticatorHomeScreen(sealedActivity: SealedLightActivity) :
                                 onClick = ::goToEnte,
                                 contentDescription = "Settings",
                             ),
-                            LightBarButton.LightIcon(
-                                icon = LightIcons.ADD,
-                                onClick = ::goToAddNew,
-                                contentDescription = "Add code",
-                            ),
+                            if (signedIn == false) LightBarButton.Text("SIGN IN", onClick = ::goToEnte) else null,
+                            null,
                         ),
                     )
                 }

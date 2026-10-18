@@ -9,8 +9,8 @@ import kotlinx.coroutines.withContext
 data class SyncResult(val added: Int, val updated: Int, val removed: Int, val skipped: Int)
 
 /**
- * One-way sync: Ente → this phone. Codes added on the phone stay local; codes from Ente are kept
- * in step with the account (edits update, deletions and trashing remove them here).
+ * One-way sync: Ente → this phone. Codes are kept in step with the account (edits update,
+ * deletions and trashing remove them here).
  */
 class EnteSync internal constructor(
     private val store: EnteSessionStore,
@@ -49,7 +49,7 @@ class EnteSync internal constructor(
         }
     }
 
-    /** Removes everything that came from Ente (used when signing out). */
+    /** Removes every synced code (used when signing out). */
     suspend fun forgetSyncedCodes(): Int = mutex.withLock {
         withContext(Dispatchers.IO) {
             val all = links.all()

@@ -344,4 +344,4 @@ object HeapWorkingMemory : WorkingMemory {
     override fun <T> use(sizeBytes: Int, block: (ByteBuffer) -> T): T = block(ByteBuffer.allocateDirect(sizeBytes))
 }
 
-class DecryptionFailedException : Exception("Wrong password, or the export file is damaged.")
+class DecryptionFailedException : Exception("Wrong password, or Ente's data couldn't be decrypted.")
