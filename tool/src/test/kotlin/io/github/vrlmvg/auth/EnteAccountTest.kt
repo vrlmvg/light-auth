@@ -34,6 +34,14 @@ class EnteAccountTest {
     )
 
     @Test
+    fun refusesUnsafeArgonSettings() {
+        val salt = "XIogVKWmo/iVm7rSGwYF6w=="
+        for ((mem, ops) in listOf(1024L to 2, 8L * 1024 * 1024 to 1, 4L * 1024 * 1024 * 1024 to 4, 64L * 1024 * 1024 to 0)) {
+            assertFailsWith<EnteApiException>("$mem/$ops") { EnteAccountCrypto.deriveKek("pw", salt, mem, ops) }
+        }
+    }
+
+    @Test
     fun derivesKekAndLoginKeyLikeLibsodium() {
         val kek = kek()
         assertEquals(str("kekHex"), kek.toHex())

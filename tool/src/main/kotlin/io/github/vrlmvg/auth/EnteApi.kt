@@ -16,6 +16,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.util.concurrent.TimeUnit
 
 const val ENTE_DEFAULT_ENDPOINT = "https://api.ente.io"
 
@@ -28,7 +29,16 @@ class EnteApiException(message: String) : Exception(message)
 /** The few Ente ("museum") endpoints the Auth app uses to sign in and read codes. */
 class EnteApi(private val endpoint: String = ENTE_DEFAULT_ENDPOINT) {
     private val json = Json { ignoreUnknownKeys = true }
-    private val client = HttpClient(OkHttp) { expectSuccess = false }
+    private val client = HttpClient(OkHttp) {
+        expectSuccess = false
+        engine {
+            config {
+                connectTimeout(15, TimeUnit.SECONDS)
+                readTimeout(30, TimeUnit.SECONDS)
+                writeTimeout(30, TimeUnit.SECONDS)
+            }
+        }
+    }
 
     suspend fun srpAttributes(email: String): SrpAttributes {
         val response = get("/users/srp/attributes") { parameter("email", email) }

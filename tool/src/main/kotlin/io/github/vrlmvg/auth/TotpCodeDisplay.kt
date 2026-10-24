@@ -40,14 +40,17 @@ fun TotpCodeDisplay(
         }
     }
 
+    // A bad secret shows a message instead of crashing the whole list.
     val totp = remember(currentUnixTime, secret, digits, period, algorithm) {
-        TotpGenerator.generate(
-            secret = secret,
-            digits = digits,
-            period = period,
-            algorithm = algorithm,
-            currentUnixTime = currentUnixTime,
-        )
+        runCatching {
+            TotpGenerator.generate(
+                secret = secret,
+                digits = digits,
+                period = period,
+                algorithm = algorithm,
+                currentUnixTime = currentUnixTime,
+            )
+        }.getOrNull()
     }
 
     Column(modifier = modifier) {
@@ -66,6 +69,14 @@ fun TotpCodeDisplay(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+        if (totp == null) {
+            LightText(
+                text = "Invalid secret",
+                variant = LightTextVariant.Copy,
+                modifier = Modifier.padding(top = 0.5f.gridUnitsAsDp()),
+            )
+            return@Column
         }
         LightText(
             text = totp.code,

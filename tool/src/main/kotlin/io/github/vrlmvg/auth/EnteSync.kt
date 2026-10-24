@@ -38,7 +38,10 @@ class EnteSync internal constructor(
                             Change.None -> Unit
                         }
                     }
-                    since = page.diff.maxOf { it.updatedAt }
+                    val next = page.diff.maxOf { it.updatedAt }
+                    // A server that doesn't move forward would otherwise keep us here forever.
+                    if (next <= since) break
+                    since = next
                     if (page.diff.size < 500) break
                 }
                 store.recordSync(since, System.currentTimeMillis())

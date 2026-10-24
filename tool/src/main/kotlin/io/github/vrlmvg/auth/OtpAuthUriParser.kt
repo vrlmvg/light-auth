@@ -5,13 +5,20 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 object OtpAuthUriParser {
-    fun parse(uriString: String): Result<Account> {
+    /** Never throws: malformed input (bad escapes, invalid secret, …) comes back as a failure. */
+    fun parse(uriString: String): Result<Account> = runCatching { parseOrThrow(uriString) }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) },
+    )
+
+    private fun parseOrThrow(uriString: String): Result<Account> {
         val trimmed = uriString.trim()
         if (trimmed.isEmpty()) {
             return Result.failure(IllegalArgumentException("QR code is empty"))
         }
 
-        val uri = URI(trimmed)
+        // Some apps leave spaces in the label unescaped.
+        val uri = URI(trimmed.replace(" ", "%20"))
         if (uri.scheme?.equals("otpauth", ignoreCase = true) != true) {
             return Result.failure(IllegalArgumentException("Invalid QR Code"))
         }
@@ -35,7 +42,10 @@ object OtpAuthUriParser {
         val algorithm = runCatching { TotpAlgorithm.normalize(query["algorithm"]) }
             .getOrElse { return Result.failure(it) }
 
-        if (digits <= 0) {
+        if (Base32.decode(secret).isEmpty()) {
+            return Result.failure(IllegalArgumentException("Invalid secret"))
+        }
+        if (digits !in 1..10) {
             return Result.failure(IllegalArgumentException("Invalid digits: $digits"))
         }
         if (period <= 0) {

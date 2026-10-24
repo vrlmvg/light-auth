@@ -35,7 +35,8 @@ object TotpGenerator {
                 (hash[offset + 2].toInt() and 0xFF shl 8) or
                 (hash[offset + 3].toInt() and 0xFF)
 
-        val modulus = 10.0.pow(digits).toInt()
+        require(digits <= 10) { "digits must be at most 10" }
+        val modulus = 10.0.pow(digits).toLong()
         val otp = binary % modulus
         val remainingSeconds = period - (currentUnixTime % period).toInt()
 

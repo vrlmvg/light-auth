@@ -48,4 +48,25 @@ class OtpAuthUriParserTest {
         val result = OtpAuthUriParser.parse("https://example.com")
         assertTrue(result.isFailure)
     }
+
+    @Test
+    fun malformedInputFailsInsteadOfThrowing() {
+        for (uri in listOf(
+            "otpauth://totp/Bad%zzEscape?secret=JBSWY3DPEHPK3PXP",
+            "otpauth://totp/Example?secret=not-base32!",
+            "otpauth://totp/Example?secret=",
+            "otpauth://totp/Example?secret=JBSWY3DPEHPK3PXP&digits=12",
+            "otpauth://totp/Example?secret=JBSWY3DPEHPK3PXP&period=0",
+            "otpauth://totp/[broken",
+        )) {
+            assertTrue(OtpAuthUriParser.parse(uri).isFailure, uri)
+        }
+    }
+
+    @Test
+    fun acceptsUnescapedSpaces() {
+        val account = OtpAuthUriParser.parse("otpauth://totp/My Bank:me?secret=JBSWY3DPEHPK3PXP&issuer=My Bank").getOrThrow()
+        assertEquals("My Bank", account.issuer)
+        assertEquals("me", account.label)
+    }
 }

@@ -81,6 +81,10 @@ data class EnteCode(val uri: String, val trashed: Boolean)
 // --- Crypto chain -----------------------------------------------------------------------------
 
 internal object EnteAccountCrypto {
+    private const val MIN_MEM_LIMIT = 8L * 1024 * 1024
+    private const val MAX_MEM_LIMIT = 1024L * 1024 * 1024
+    private const val MAX_OPS_LIMIT = 1024
+    private const val MIN_WORK = 16L * 1024 * 1024
     private val b64 = Base64.getDecoder()
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -92,14 +96,21 @@ internal object EnteAccountCrypto {
         opsLimit: Int,
         memory: WorkingMemory = HeapWorkingMemory,
         onProgress: (Float) -> Unit = {},
-    ): ByteArray = EnteCrypto.argon2id(
-        password = password.toByteArray(Charsets.UTF_8),
-        salt = b64.decode(kekSalt),
-        opsLimit = opsLimit,
-        memLimitBytes = memLimit,
-        memory = memory,
-        onProgress = onProgress,
-    )
+    ): ByteArray {
+        // A hostile server could ask for trivial settings to make the SRP exchange easy to crack offline,
+        // or for more memory than a phone (or an Int-sized buffer) can hold.
+        if (memLimit !in MIN_MEM_LIMIT..MAX_MEM_LIMIT || opsLimit !in 1..MAX_OPS_LIMIT || memLimit * opsLimit < MIN_WORK) {
+            throw EnteApiException("Your server asked for unsafe key settings. Sign-in stopped.")
+        }
+        return EnteCrypto.argon2id(
+            password = password.toByteArray(Charsets.UTF_8),
+            salt = b64.decode(kekSalt),
+            opsLimit = opsLimit,
+            memLimitBytes = memLimit,
+            memory = memory,
+            onProgress = onProgress,
+        )
+    }
 
     /** KEK → master key → X25519 secret key → session token (url-safe base64, as Ente sends it back). */
     fun unlock(keyAttributes: KeyAttributes, encryptedToken: String, kek: ByteArray): Pair<ByteArray, String> {
